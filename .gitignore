@@ -1,0 +1,7 @@
+agents/
+especificacion-proyecto-individual-isa-encoder-riscv.md
+especificacion-proyecto-individual-isa-encoder-riscv.pdf
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
