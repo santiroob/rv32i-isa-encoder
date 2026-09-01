@@ -325,7 +325,7 @@ def main():
     instruction = sys.argv[1]
     word = encode_instruction(instruction) & 0xFFFFFFFF
 
-    print(explain_instruction(instruction, word))
+    # print(explain_instruction(instruction, word))
 
     # Do not modify the following line format.
     print(f"HEX: 0x{word:08x}")
