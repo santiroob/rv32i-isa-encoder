@@ -130,7 +130,7 @@ riscv64-unknown-elf-gcc -march=rv32i -mabi=ilp32 -c case.s -o case.o
 riscv64-unknown-elf-objdump -d case.o
 ```
 
-## 6. Preparación de la herramienta
+## 6. Preparación y ejecución de la herramienta
 
 La herramienta no requiere paquetes externos de Python. Solo se necesita:
 
@@ -155,6 +155,68 @@ Ejemplo:
 ```bash
 ./run.sh "lw x29, 8(x30)"
 ```
+
+### 6.1. macOS
+
+En macOS se puede ejecutar directamente desde Terminal, siempre que `python3`
+esté instalado y `run.sh` tenga permiso de ejecución:
+
+```bash
+cd /ruta/al/proyecto
+chmod +x run.sh
+./run.sh "add x7, x20, x6"
+```
+
+Para ejecutar también la comparación contra el toolchain oficial, el toolchain
+usado localmente se instaló con Homebrew:
+
+```bash
+brew install riscv-gnu-toolchain
+python3 check_vectors.py
+```
+
+### 6.2. Ubuntu
+
+En Ubuntu se instala Python, Bash y el toolchain RISC-V desde `apt`. Los
+paquetes `gcc-riscv64-unknown-elf` y `binutils-riscv64-unknown-elf` proveen los
+comandos `riscv64-unknown-elf-gcc` y `riscv64-unknown-elf-objdump`.
+
+```bash
+sudo apt update
+sudo apt install python3 bash gcc-riscv64-unknown-elf binutils-riscv64-unknown-elf
+cd /ruta/al/proyecto
+chmod +x run.sh
+./run.sh "add x7, x20, x6"
+python3 check_vectors.py
+```
+
+Si `apt` no encuentra esos paquetes, se debe habilitar el repositorio `universe`
+de Ubuntu y volver a ejecutar `sudo apt update`.
+
+### 6.3. Windows
+
+En Windows se recomienda usar WSL con Ubuntu, porque el proyecto se invoca con
+`./run.sh` y depende de Bash. Desde PowerShell como administrador:
+
+```powershell
+wsl --install -d Ubuntu
+```
+
+Después de reiniciar y abrir Ubuntu en WSL, se prepara igual que en Ubuntu:
+
+```bash
+sudo apt update
+sudo apt install python3 bash gcc-riscv64-unknown-elf binutils-riscv64-unknown-elf
+cd /mnt/c/Users/<usuario>/ruta/al/proyecto
+chmod +x run.sh
+./run.sh "add x7, x20, x6"
+python3 check_vectors.py
+```
+
+También se puede copiar el proyecto al sistema de archivos de WSL y entrar con
+`cd ~/ProyectoIndividual`. Lo importante para la verificación es que el comando
+`./run.sh "<instruccion>"` funcione dentro de una terminal con Bash y `python3`
+disponibles.
 
 ## 7. Ejemplos de salida explicativa
 
@@ -330,3 +392,8 @@ campos de codificación.
   2019.
 - GNU RISC-V toolchain usado localmente:
   `riscv64-unknown-elf-gcc` y `riscv64-unknown-elf-objdump`.
+- Documentación de WSL de Microsoft:
+  <https://learn.microsoft.com/windows/wsl/install>.
+- Paquetes de Ubuntu:
+  <https://packages.ubuntu.com/search?keywords=gcc-riscv64-unknown-elf> y
+  <https://packages.ubuntu.com/search?keywords=binutils-riscv64-unknown-elf>.
