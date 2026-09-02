@@ -3,11 +3,9 @@
 # Uso: ./run.sh "<instruccion>"
 # Ejemplo: ./run.sh "add x5, x6, x7"
 #
-# Este script asume el esqueleto en Python tal cual se entrega. Si usted
-# reestructura el proyecto (otro lenguaje, binario compilado, entorno
-# virtual, etc.), ajuste este archivo para que siga invocando su solución
-# de la misma forma: un solo argumento con la instrucción, y una línea de
-# salida "HEX: 0x........".
+# Este script invoca la versión final del codificador. Mantiene el contrato
+# requerido por la especificación: un solo argumento con la instrucción, y una
+# línea de salida "HEX: 0x........" para la validación automática.
 set -euo pipefail
 
 if [ "$#" -ne 1 ]; then
@@ -17,4 +15,4 @@ if [ "$#" -ne 1 ]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec python3 "$SCRIPT_DIR/encoder_skeleton.py" "$1"
+exec python3 "$SCRIPT_DIR/encoder.py" "$1"

@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
 """
-Educational RISC-V Instruction Encoder Skeleton.
+Educational RISC-V Instruction Encoder.
 CE4301 Computer Architecture I — 2026-IIS
 
-This skeleton implements the command-line and output contract required by
-the specification. You must complete the two functions marked with TODO.
+Final command-line encoder for the RV32I subset required by the project.
+It receives one instruction and prints both an explanatory breakdown and
+the machine-readable HEX line used by automated validation.
 """
 
 import sys
@@ -18,6 +18,7 @@ BOX_WIDTH = 78
 CONTENT_WIDTH = BOX_WIDTH - 4
 BG_BLUE = "\033[44m"
 FG_WHITE = "\033[1;37m"
+FG_RED = "\033[1;31m"
 RESET = "\033[0m"
 
 
@@ -204,7 +205,11 @@ def parse_immediate(imm_str: str | None) -> int | None:
     """
     if imm_str is None:
         return None
-    return int(imm_str, 0)
+
+    try:
+        return int(imm_str, 0)
+    except ValueError:
+        raise ValueError(f"Inmediato inválido: {imm_str}") from None
 
 
 def resolve_fields(parsed: ParsedInstruction) -> ResolvedFields:
@@ -567,10 +572,7 @@ def field_to_lines(field: DisplayField) -> list[str]:
     Formats one display field and wraps it to the terminal window width.
     """
     decimal_value = field.value if field.decimal_value is None else field.decimal_value
-    text = (
-        f"{field.name}: {field.description} "
-        f"(valor decimal: {decimal_value})"
-    )
+    text = f"{field.name}: {field.description} (valor decimal: {decimal_value})"
     return textwrap.wrap(
         text,
         width=CONTENT_WIDTH,
@@ -716,9 +718,16 @@ def main():
         sys.exit(2)
 
     instruction = sys.argv[1]
-    word = encode_instruction(instruction) & 0xFFFFFFFF
+    program_name = sys.argv[0].rsplit("/", 1)[-1]
 
-    print(explain_instruction(instruction, word))
+    try:
+        word = encode_instruction(instruction) & 0xFFFFFFFF
+        explanation = explain_instruction(instruction, word)
+    except ValueError as error:
+        print(f"{FG_RED}{program_name}: error: {error}{RESET}", file=sys.stderr)
+        sys.exit(1)
+
+    print(explanation)
 
     # Do not modify the following line format.
     print(f"HEX: 0x{word:08x}")
