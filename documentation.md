@@ -78,6 +78,25 @@ La construcción de la palabra sigue estos formatos:
 El proyecto se mantiene deliberadamente pequeño para que el flujo sea fácil de
 auditar durante la revisión.
 
+El siguiente diagrama resume el flujo principal de la herramienta:
+
+```mermaid
+flowchart TD
+    U[Usuario] --> R[run.sh]
+    R --> E[encoder.py]
+
+    E --> M[main]
+    M --> P[parse_instruction]
+    P --> RF[resolve_fields]
+    RF --> IM[(INSTRUCTION_MAP)]
+    RF --> EI[encode_instruction]
+    EI --> EX[explain_instruction]
+
+    EX --> O[Salida en terminal]
+    O --> H[HEX: 0xXXXXXXXX]
+    O --> V[Explicación visual de campos]
+```
+
 | Archivo | Responsabilidad |
 |---|---|
 | `run.sh` | Punto de entrada fijo. Recibe una instrucción como único argumento e invoca `encoder.py`. |
@@ -218,92 +237,17 @@ También se puede copiar el proyecto al sistema de archivos de WSL y entrar con
 `./run.sh "<instruccion>"` funcione dentro de una terminal con Bash y `python3`
 disponibles.
 
-## 7. Ejemplos de salida explicativa
+## 7. Formato de salida
 
-La salida real se presenta en una ventana ANSI azul en la terminal. Los ejemplos
-siguientes muestran el mismo contenido en forma compacta para que sea legible en
-Markdown.
+La salida explicativa se presenta en una ventana ANSI azul en la terminal. La
+imagen muestra el formato visual usado por el programa: instrucción recibida,
+formato identificado, palabra binaria agrupada, hexadecimal, tabla de campos y
+descripción de cada campo.
 
-### 7.1. Formato R: `add x7, x20, x6`
+![Formato de salida del codificador](images/output_format.png)
 
-```text
-Codificador de instrucciones RISC-V RV32I
-Instrucción : add x7, x20, x6
-Formato     : tipo R
-Binario     : 0000000 00110 10100 000 00111 0110011
-Palabra     : 0x006a03b3
-
-Tabla de campos:
-funct7  [31:25] = 0000000 = 0   Distingue operaciones tipo R que comparten opcode y funct3.
-rs2     [24:20] = 00110   = 6   Segundo registro leído por la operación.
-rs1     [19:15] = 10100   = 20  Primer registro leído por la operación.
-funct3  [14:12] = 000     = 0   Selecciona la operación exacta dentro del opcode.
-rd      [11:7]  = 00111   = 7   Registro donde se escribe el resultado.
-opcode  [6:0]   = 0110011 = 51  Familia principal de la instrucción.
-
-HEX: 0x006a03b3
-```
-
-### 7.2. Formato I: `addi x5, x25, 2035`
-
-```text
-Codificador de instrucciones RISC-V RV32I
-Instrucción : addi x5, x25, 2035
-Formato     : tipo I
-Binario     : 011111110011 11001 000 00101 0010011
-Palabra     : 0x7f3c8293
-
-Tabla de campos:
-imm[11:0] [31:20] = 011111110011 = 2035 Constante con signo usada como segundo operando.
-rs1       [19:15] = 11001        = 25   Registro fuente leído por la operación.
-funct3    [14:12] = 000          = 0    Selecciona la operación aritmética o carga.
-rd        [11:7]  = 00101        = 5    Registro donde se escribe el resultado.
-opcode    [6:0]   = 0010011      = 19   Familia principal de la instrucción.
-
-HEX: 0x7f3c8293
-```
-
-### 7.3. Formato S: `sw x31, -411(x23)`
-
-```text
-Codificador de instrucciones RISC-V RV32I
-Instrucción : sw x31, -411(x23)
-Formato     : tipo S
-Binario     : 1110011 11111 10111 010 00101 0100011
-Palabra     : 0xe7fba2a3
-
-Tabla de campos:
-imm[11:5] [31:25] = 1110011 = 115 Parte alta del desplazamiento con signo.
-rs2       [24:20] = 11111   = 31  Registro cuyo valor se escribe en memoria.
-rs1       [19:15] = 10111   = 23  Registro base para calcular la dirección.
-funct3    [14:12] = 010     = 2   Selecciona el tamaño del dato almacenado.
-imm[4:0]  [11:7]  = 00101   = 5   Parte baja del desplazamiento con signo.
-opcode    [6:0]   = 0100011 = 35  Familia principal de la instrucción.
-
-HEX: 0xe7fba2a3
-```
-
-### 7.4. Formato B: `beq x30, x4, -80`
-
-```text
-Codificador de instrucciones RISC-V RV32I
-Instrucción : beq x30, x4, -80
-Formato     : tipo B
-Binario     : 1 111101 00100 11110 000 1000 1 1100011
-Palabra     : 0xfa4f08e3
-
-Tabla de campos:
-imm[12]   [31]    = 1       = 1  Signo del desplazamiento relativo.
-imm[10:5] [30:25] = 111101  = 61 Parte media alta del desplazamiento.
-rs2       [24:20] = 00100   = 4  Segundo registro usado en la comparación.
-rs1       [19:15] = 11110   = 30 Primer registro usado en la comparación.
-funct3    [14:12] = 000     = 0  Selecciona la condición evaluada.
-imm[4:1]  [11:8]  = 1000    = 8  Parte baja; el bit 0 es implícito.
-imm[11]   [7]     = 1       = 1  Completa el desplazamiento relativo.
-opcode    [6:0]   = 1100011 = 99 Familia principal de la instrucción.
-
-HEX: 0xfa4f08e3
-```
+La salida también conserva una línea `HEX: 0x........`, pensada para que otros
+scripts puedan extraer la codificación sin depender del formato visual.
 
 ## 8. Evidencia de comparación contra herramienta oficial
 
