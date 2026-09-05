@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Punto de entrada fijo requerido por la especificación.
+# Punto de entrada principal del proyecto.
 # Uso: ./run.sh "<instruccion>"
 # Ejemplo: ./run.sh "add x5, x6, x7"
 #
-# Este script invoca la versión final del codificador. Mantiene el contrato
-# requerido por la especificación: un solo argumento con la instrucción, y una
-# línea de salida "HEX: 0x........" para la validación automática.
+# Este script invoca la versión final del codificador: un solo argumento con la
+# instrucción y una línea de salida "HEX: 0x........" para validación por scripts.
 set -euo pipefail
 
 if [ "$#" -ne 1 ]; then
